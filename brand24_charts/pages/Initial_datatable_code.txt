@@ -1,0 +1,45 @@
+import dash
+from dash import Dash, html, dash_table, dcc, callback, Output, Input
+import pandas as pd
+
+dash.register_page(__name__, path='/')
+
+# Data from 23/02/2025 to 30/09/2024
+df = pd.read_csv('https://raw.githubusercontent.com/JuanBatnag/plotly_pandas_practice/refs/heads/main/ALL_WPS_2025-02-24_03.18.csv')
+
+layout = html.Div([
+    html.H2('West Philippine Sea Data'),
+    html.Hr(),
+
+    html.H3('Select Timeframe'),
+    dcc.RadioItems(options=['Today', 'Yesterday', 'Last 7 days', 
+                            'Last Thirty Days', 'Last Year', 'All'],
+                            value='Last 7 days',
+                            id='timeframe_selector'),
+
+    dash_table.DataTable(
+        id = 'table',
+        data=df.to_dict('records'),
+        columns=[{'id': c, 'name': c} for c in df.columns],
+        style_cell={
+            'overflow': 'hidden',
+            'textOverflow': 'ellipsis',
+            'maxWidth': 0,
+        },
+        tooltip_data=[
+            {
+                column: {'value': str(value), 'type': 'markdown'}
+                for column, value in row.items()
+            } for row in df.to_dict('records')
+        ],
+        tooltip_duration=None
+    )
+])
+
+@callback(
+    Output(component_id='table', component_property='data'),
+    Input(component_id='timeframe_selector', component_property='timeframe')
+)
+def update_table(timeframe):
+
+    return 
